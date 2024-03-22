@@ -55,8 +55,6 @@ def construct_app(test_config=None):
     application.register_blueprint(auth_bp)
     application.register_blueprint(base_bp)
 
-    @application.route('/welcome')
-    def welcome():
-        return 'Welcome to the Opportunity Tracker Dashboard!'
+  
 
     return application
