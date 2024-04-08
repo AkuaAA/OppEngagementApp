@@ -18,6 +18,8 @@ def construct_app(test_config=None):
         SECRET_KEY= os.getenv('SECRET_KEY', 'development'),
         DATABASE=os.path.join(application.instance_path, 'opportunity_tracker.sqlite'),
         LOGIN_VIEW='auth.login'
+        #RECAPTCHA_PUBLIC_KEY=os.getenv('RECAPTCHA_PUBLIC_KEY'),
+        #RECAPTCHA_PRIVATE_KEY=os.getenv('RECAPTCHA_PRIVATE_KEY')
     )
     
      

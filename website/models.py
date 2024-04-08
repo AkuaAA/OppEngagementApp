@@ -1,5 +1,7 @@
 from website import bcrypt, db
 from flask_login import UserMixin
+from datetime import datetime
+from .extension import db
 
 class Employee(UserMixin, db.Model):
     __tablename__ = "employees"
@@ -13,6 +15,9 @@ class Employee(UserMixin, db.Model):
     posts = db.relationship('Post', back_populates='post_author', lazy=True)
     opportunities = db.relationship('Opportunity', backref='employee_opportunity', lazy=True)
     comments = db.relationship('Comments', back_populates='comment_author', lazy=True)
+    
+    failed_login_attempts = db.Column(db.Integer, default=0)
+    account_lockout_until = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
