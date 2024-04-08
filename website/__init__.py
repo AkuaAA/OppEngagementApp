@@ -20,11 +20,11 @@ def construct_app(test_config=None):
         LOGIN_VIEW='auth.login'
     )
     
-     # Initialize login_manager with application
+     
     login_manager = LoginManager()
     login_manager.init_app(application)
     
-    # Set the login view and message category
+ 
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = "danger"
     
@@ -33,23 +33,20 @@ def construct_app(test_config=None):
         return Employee.query.get(int(user_id))
 
     if test_config is None:
-        # Load the default configuration if it exists, unless testing
-        application.config.from_object(DevConfig)  # Use DevConfig for development
+        application.config.from_object(DevConfig)  
     else:
-        # Load the test configuration if provided
         application.config.from_mapping(test_config)
 
-    # Make sure the instance folder is available
     try:
         os.makedirs(application.instance_path)
     except OSError:
         pass
 
-    # Initialize db and bcrypt with the application
+    # Initialse db and bcrypt with the application
     db.init_app(application)
     bcrypt.init_app(application)
 
-    # Initialize migrate with the application and db
+   
     migrate = Migrate(application, db)
 
     application.register_blueprint(auth_bp)

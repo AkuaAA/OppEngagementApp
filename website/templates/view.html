@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ post.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.body }}</p>
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('base.edit_post', id=post.id) }}">Edit</a>
+    {% endif %}
+
+    {% if not current_user.is_admin %}
+        <form action="{{ url_for('base.request_join', id=post.id) }}" method="post" onsubmit="return showNotification()">
+            <input type="submit" value="Request to Join">
+        </form>
+    {% endif %}
+
+    <script>
+    function showNotification() {
+        alert('Admin has been notified.');
+        return true;
+    }
+    </script>
+</body>
+</html>

@@ -1,15 +1,15 @@
 {% extends '_base.html' %}
 
 {% block header %}
-  <h1>{% block title %}New Post{% endblock %}</h1>
+  <h1>{% block title %}{% if post %}Edit Post{% else %}New Post{% endif %}{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
   <form method="post">
     <label for="title">Title</label>
-    <input name="title" id="title" value="{{ request.form['title'] }}" required>
+    <input name="title" id="title" value="{{ post.title if post else '' }}" required>
     <label for="body">Body</label>
-    <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
+    <textarea name="body" id="body">{{ post.body if post else '' }}</textarea>
     <input type="submit" value="Save">
   </form>
 {% endblock %}

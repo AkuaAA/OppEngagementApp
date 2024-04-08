@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import login_user,logout_user, login_required, current_user
-from .extension  import db, bcrypt
+from flask_login import login_user, logout_user, login_required, current_user
+from .extension import db, bcrypt
 from .models import Employee
 from .forms import RegisterForm, LoginForm
 
@@ -28,14 +28,13 @@ def register():
         return redirect(url_for("base.home"))
     form = RegisterForm(request.form)
     if form.validate_on_submit():
-        user = Employee(email=form.email.data, password=bcrypt.generate_password_hash(form.password.data))
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = Employee(email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        login_user(user)
-        flash("You are registered and are now logged in. Welcome!", "success")
-        return redirect(url_for("base.home"))
-    return render_template('register.html', form=form)
-
+        flash('Your account has been created! You are now able to log in', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template("register.html", form=form)
 
 @auth_bp.route('/logout')
 @login_required

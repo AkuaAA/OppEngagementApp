@@ -1,80 +1,86 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, g, abort
+
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from .models import Post
 from . import db
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired
+
 
 base_bp = Blueprint("base", __name__)
 
+# Form for posts
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    body = TextAreaField('Body', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+# Route for home page
 @base_bp.route("/")
 @login_required
 def home():
     posts = Post.query.all()  # fetch all posts from the database
-    return render_template('_base.html', posts=posts)
+    return render_template('index.html', posts=posts)
 
-@base_bp.route('/create', methods=('GET', 'POST'))
+# Route for creating a new post
+@base_bp.route('/create', methods=['POST', 'GET'])
 @login_required
 def create():
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
-        error = None
+        new_post = Post(title=title, body=body, author_id=current_user.id)
 
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            new_post = Post(title=title, body=body, author_id=current_user.id)
+        try:
             db.session.add(new_post)
             db.session.commit()
-            flash('Your post was successfully created')
-            return redirect(url_for('_base.home'))
+            return redirect('/')
+        except Exception as e:
+            return 'There was an issue adding your post'
 
-    return render_template('create.html')
+    else:
+        return render_template('create.html')
 
-def get_post(id, check_author=True):
-    post = Post.query.get(id)
+# Route for viewing a post
+@base_bp.route('/view/<int:id>', methods=['GET'])
+def view_post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('view.html', post=post)
 
-    if post is None:
-        abort(404, f"Post id {id} doesn't exist.")
+# Route for requesting to join a post
+@base_bp.route('/request_join/<int:id>', methods=['POST'])
+def request_join(id):
+    post = Post.query.get_or_404(id)
+    flash('The owner of this opportunity has been notified and will be in touch as soon as possible.', 'info')
+    return redirect(url_for('base.home'))
 
-    if check_author and post.author_id != current_user.id:
-        abort(403)
-
-    return post
-
-
-
-base_bp.route('/update/<int:post_id>', methods=('GET', 'POST'))
+# Route for editing a post
+@base_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-def update(post_id):
-    post = Post.query.get(post_id)
+def edit_post(id):
+    post = Post.query.get_or_404(id)
+    form = PostForm()
 
-    if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
-        error = None
-
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            post.title = title
-            post.body = body
-            db.session.commit()
-            flash('Your post was successfully updated')
-            return redirect(url_for('_base.home'))
-
-    return render_template('update.html', post=post)
-
-@base_bp.route('/<int:id>/delete', methods=('POST',))
-@login_required
-def delete(id):
-    post = get_post(id)
-    if post is not None:
-        db.session.delete(post)
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.body.data
         db.session.commit()
-    return redirect(url_for('_base.home'))
+        flash('Your post has been updated!', 'success')
+        return redirect(url_for('base.home'))
+
+    if request.method == 'GET':
+        form.title.data = post.title
+        form.body.data = post.body
+
+    return render_template('update.html', form=form)
+
+# Route for deleting a post
+@base_bp.route('/delete_post/<int:id>', methods=['POST'])
+@login_required
+def delete_post(id):
+    post = Post.query.get(id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your post was successfully deleted')
+    return redirect(url_for('base.home'))

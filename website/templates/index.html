@@ -1,52 +1,34 @@
-
-{% extends "_base.html" %}
+{% extends '_base.html' %}
 
 {% block welcome_message %}
-<h1 class="text-center">Welcome {{current_user.email}}!</h1>
+<h1 class="text-center">CSU Opportunity Tracker Dashboard</h1>
 {% endblock %}
 
 {% block title %}
-  Dashboard
+  <h1 class="dashboard-title"> Welcome {{current_user.email}}!</h1>
 {% endblock %}
 
+
 {% block new_post %}
-  {% if g.user %}
-    New
+  {% if current_user.is_admin %}
+    <a href="{{ url_for('base.create') }}" class="btn-outline-secondary">New Post</a>
   {% endif %}
 {% endblock %}
 
 {% block posts %}
   {% for post in posts %}
     <div class="post">
-      <h2>{{ post['title'] }}</h2>
-      <p>by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</p>
-      {% if g.user['id'] == post['author_id'] %}
-        <a href="{{ url_for('edit_post', post_id=post['id']) }}">Edit</a>
+      {% if current_user.is_admin %}
+        <h2><a href="{{ url_for('base.edit_post', id=post.id) }}">{{ post.title }}</a></h2>
+        <form method="POST" action="{{ url_for('base.delete_post', id=post.id) }}">
+          <input type="submit" value="Delete" class="delete-button">
+          <a href="{{ url_for('base.edit_post', id=post.id) }}" class="edit-button btn-outline-secondary btn-sm">Edit</a>
+        </form>
+      {% else %}
+        <h2>{{ post.title }}</h2>
+        <p>{{ post.body }}</p>
+        <a href="{{ url_for('base.view_post', id=post.id) }}" class="btn btn-primary">View Post</a>
       {% endif %}
-      <p>{{ post['body'] }}</p>
     </div>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
   {% endfor %}
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

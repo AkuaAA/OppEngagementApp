@@ -1,20 +1,21 @@
-{% extends '_base.html' %}
-
-{% block header %}
-    <h1>{% block title %}Edit "{{ post.title }}"{% endblock %}</h1>
-{% endblock %}
-
 {% block content %}
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
     <form method="post">
+        {{ form.hidden_tag() }}
         <label for="title">Title</label>
-        <input name="title" id="title"
-            value="{{ request.form['title'] or post.title }}" required>
+        {{ form.title(id='title') }}
+
         <label for="body">Body</label>
-        <textarea name="body" id="body">{{ request.form['body'] or post.body }}</textarea>
-        <input type="submit" value="Save">
+        {{ form.body(id='body') }}
+
+        {{ form.submit() }}
     </form>
+    {% if post %}
     <hr>
-    <form action="{{ url_for('delete', id=post.id) }}" method="post">
+    <form action="{{ url_for('base.delete_post', id=post.id) }}" method="post">
         <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
     </form>
+    {% endif %}
 {% endblock %}

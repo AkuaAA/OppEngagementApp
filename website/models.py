@@ -5,7 +5,7 @@ class Employee(UserMixin, db.Model):
     __tablename__ = "employees"
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=False, name='uq_employee_email')
     password = db.Column(db.String, nullable=False)
     created_on = db.Column(db.DateTime, nullable=False, default=db.func.now())
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
@@ -17,6 +17,9 @@ class Employee(UserMixin, db.Model):
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+
     def __repr__(self):
         return f"<Employee {self.email}>"
 
@@ -27,7 +30,7 @@ class Post(db.Model):
     title = db.Column(db.String, nullable=False)
     body = db.Column(db.Text, nullable=False)
     created_on = db.Column(db.DateTime, nullable=False, default=db.func.now())
-    author_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('employees.id', name='fk_posts_author_id'), nullable=False)
 
     post_author = db.relationship('Employee', back_populates='posts')
 
