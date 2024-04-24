@@ -57,3 +57,5 @@ def construct_app(test_config=None):
   
 
     return application
+
+app = construct_app()
