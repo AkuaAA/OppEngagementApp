@@ -1,6 +1,8 @@
+import os
 from decouple import config
 
 DB_URI = config("DB_URL", default="sqlite:///opportunities.sqlite")
+
 
 class BaseConfig(object):
     DEBUG = False
@@ -13,6 +15,8 @@ class BaseConfig(object):
     WTF_CSRF_ENABLED = True
     DEBUG_TB_ENABLED = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
+    RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+    RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 class DevConfig(BaseConfig):
     DEVELOPMENT = True
